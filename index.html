@@ -66,10 +66,37 @@
             transform: scale(1.05);
         }
 
+        /* ÚJ: Nyelválasztó gomb stílusa */
+        #language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px; /* Jobb felső sarok */
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f39c12; /* Narancssárga */
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em; /* Kisebb betűméret, hogy elférjen HU/EN */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #e67e22;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.2s, transform 0.2s, opacity 0.5s ease;
+            z-index: 1001;
+        }
+
+        #language-toggle:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+
         #info-modal {
             display: none;
             position: fixed;
-            z-index: 2000; /* MÓDOSÍTOTT ÉRTÉK */
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
@@ -229,7 +256,7 @@
         #newRoundBtn {
             background-color: #17a2b8; /* Cián kék */
         }
-        #winBtn { /* ÚJ GOMB STÍLUS */
+        #winBtn {
             background-color: #4CAF50; /* Zöldebb */
             color: white;
         }
@@ -244,7 +271,7 @@
         #foldBtn:hover:not(:disabled) { background-color: #e0a800; }
         #startGameBtn:hover:not(:disabled) { background-color: #0056b3; }
         #newRoundBtn:hover:not(:disabled) { background-color: #138496; }
-        #winBtn:hover:not(:disabled) { background-color: #45a049; } /* ÚJ GOMB HOVER STÍLUS */
+        #winBtn:hover:not(:disabled) { background-color: #45a049; }
 
         button:active:not(:disabled) {
             background-color: #A93226;
@@ -256,7 +283,7 @@
         #foldBtn:active:not(:disabled) { background-color: #d39e00; }
         #startGameBtn:active:not(:disabled) { background-color: #004085; }
         #newRoundBtn:active:not(:disabled) { background-color: #117a8b; }
-        #winBtn:active:not(:disabled) { background-color: #3e8e41; } /* ÚJ GOMB ACTIVE STÍLUS */
+        #winBtn:active:not(:disabled) { background-color: #3e8e41; }
 
         button:disabled {
             background-color: #7f8c8d;
@@ -368,8 +395,7 @@
     <h1 id="main-title">Liars Poker: Revolver Rulett</h1>
 
     <div id="info-button">i</div>
-
-    <div id="info-modal">
+    <div id="language-toggle">EN</div> <div id="info-modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h2>Liars Poker - A Lőszer Tét Szabályai</h2>
@@ -378,15 +404,17 @@
             <h3>A Játék Menete:</h3>
             <ol>
                 <li>**Játék indítása:** A kör kezdetén a revolver automatikusan kap **1 golyót**. Ez a minimális tét.</li>
-                <li>**Tétrakás:**
+                <li>
+                    <h3>Tétrakás:</h3>
                     <ul>
                         <li>**"Tét hozzáadása" gomb:** Választhatsz, hogy mennyi extra golyót (1-7) teszel be a revolverbe az aktuális körben. Ez növeli a revolverben lévő golyók számát, és így a találat esélyét is.</li>
                         <li>**"All-in" gomb:** Ha készen állsz a végső próbára, kattints az "All-in" gombra. Ezzel azonnal **8 golyót** teszel a revolverbe.</li>
                     </ul>
                 </li>
-                <li>**A döntés gombok:**
+                <li>
+                    <h3>A döntés gombok:</h3>
                     <ul>
-                        <li>**"Fold/lővés" gomb:** Ezt akkor nyomd meg, ha úgy döntöttél, hogy kockáztatsz, és lövéspróbát hajtasz végre az **aktuálisan betett golyókkal**. Ha elsül, vesztettél. Ha "Katt", túlélted a kört!</li>
+                        <li>**"Fold (Lövéspróba)" gomb:** Ezt akkor nyomd meg, ha úgy döntöttél, hogy kockáztatsz, és lövéspróbát hajtasz végre az **aktuálisan betett golyókkal**. Ha elsül, vesztettél. Ha "Katt", túlélted a kört!</li>
                         <li>**"[Win]" gomb:** Ezt akkor nyomd meg, ha **az asztali póker játékban nyertél** (és így nem kell lövéspróbát tenned). Ez új kört indít, és arany színű jutalmazásban részesülsz!</li>
                     </ul>
                 </li>
@@ -395,19 +423,19 @@
             </ol>
             
             <h3>Póker Kéz Erősség (Általános Sorrend):</h3>
-            <p>Az alábbi kép segít megérteni a póker lapkombinációk erősségi sorrendjét.</p>
-            <img id="poker-rank-image" src="poker_ranks.png" alt="Póker Kéz Erősségi Sorrend">
             <p>(Megjegyzés: Az asztali játékod szabályai döntőek, ez csak egy általános segédlet.)</p>
+            <img id="poker-rank-image" src="poker_ranks.png" alt="Póker Kéz Erősségi Sorrend">
         </div>
     </div>
 
-    <div id="game-elements-container"> <div id="game-info">
-            <p>Golyók a revolverben: <span id="bullets-in-chamber">0</span>/8</p>
-            <p>Aktuális tét: <span id="current-bet">0</span> golyó</p>
+    <div id="game-elements-container">
+        <div id="game-info">
+            <p><span id="bullets-in-chamber-text">Golyók a revolverben: </span><span id="bullets-in-chamber">0</span>/8</p>
+            <p><span id="current-bet-text">Aktuális tét: </span><span id="current-bet">0</span> golyó</p>
         </div>
 
         <div class="bet-controls">
-            <label for="extraBulletAmount">Extra golyók:</label>
+            <label for="extraBulletAmount" id="extra-bullets-label">Extra golyók:</label>
             <select id="extraBulletAmount">
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -421,11 +449,15 @@
 
         <div class="button-container">
             <button id="startGameBtn">Játék indítása</button>
-            <button id="addBulletBtn" style="display: none;">Tét hozzáadása</button> <button id="allInBtn" style="display: none;">All-in (8 golyóval)</button> <button id="foldBtn" style="display: none;">Fold/Lövéspróba</button>
+            <button id="addBulletBtn" style="display: none;">Tét hozzáadása</button>
+            <button id="allInBtn" style="display: none;">All-in (8 golyóval)</button>
+            <button id="foldBtn" style="display: none;">Fold (Lövéspróba)</button>
             <button id="winBtn" style="display: none;">Win</button>
         </div>
         
-    </div> <div id="revolver-display">
+    </div>
+
+    <div id="revolver-display">
         <span id="chamber-display">?</span>
     </div>
 
@@ -458,11 +490,19 @@
         const messageDisplay = document.getElementById('message-display');
         const body = document.body;
 
-        // Új DOM elemek
         const mainTitle = document.getElementById('main-title');
         const gameElementsContainer = document.getElementById('game-elements-container');
         const redOverlay = document.getElementById('red-overlay');
         const goldOverlay = document.getElementById('gold-overlay');
+
+        // Nyelvi elemek
+        const languageToggleBtn = document.getElementById('language-toggle');
+        let currentLanguage = 'hu'; // Kezdeti nyelv: magyar
+
+        const bulletsInChamberTextSpan = document.getElementById('bullets-in-chamber-text');
+        const currentBetTextSpan = document.getElementById('current-bet-text');
+        const extraBulletsLabel = document.getElementById('extra-bullets-label');
+
 
         // Hangfájlok
         const triggerPullSound = document.getElementById('trigger-pull-sound');
@@ -475,6 +515,141 @@
         let currentBet = 0;      
         let gameActive = false;
         const MAX_CHAMBERS = 8; 
+
+        // Szövegek gyűjteménye nyelvenként
+        const texts = {
+            hu: {
+                mainTitle: "Liars Poker: Revolver Rulett",
+                infoButton: "i",
+                infoModalTitle: "Liars Poker - A Lőszer Tét Szabályai",
+                infoModalWelcome: "Üdvözöllek a Liars Poker halálos revolver rulettjében! Ebben a játékban a bátorságod és a szerencséd dönt.",
+                infoModalHowToPlayTitle: "A Játék Menete:",
+                infoModalStep1: "**Játék indítása:** A kör kezdetén a revolver automatikusan kap **1 golyót**. Ez a minimális tét.",
+                infoModalStep2Title: "Tétrakás:",
+                infoModalStep2Bullet1: "**\"Tét hozzáadása\" gomb:** Választhatsz, hogy mennyi extra golyót (1-7) teszel be a revolverbe az aktuális körben. Ez növeli a revolverben lévő golyók számát, és így a találat esélyét is.",
+                infoModalStep2Bullet2: "**\"All-in\" gomb:** Ha készen állsz a végső próbára, kattints az \"All-in\" gombra. Ezzel azonnal **8 golyót** teszel a revolverbe.",
+                infoModalStep3Title: "A döntés gombok:",
+                infoModalStep3Bullet1: "**\"Fold (Lövéspróba)\" gomb:** Ezt akkor nyomd meg, ha úgy döntöttél, hogy kockáztatsz, és lövéspróbát hajtasz végre az **aktuálisan betett golyókkal**. Ha elsül, vesztettél. Ha \"Katt\", túlélted a kört!",
+                infoModalStep3Bullet2: "**\"Win\" gomb:** Ezt akkor nyomd meg, ha **az asztali póker játékban nyertél** (és így nem kell lövéspróbát tenned). Ez új kört indít, és arany színű jutalmazásban részesülsz!",
+                infoModalStep4: "**Kiesés:** Ha a revolver elsül, a játék véget ér, és a \"Játék indítása\" gombbal tudod újra kezdeni.",
+                infoModalStep5: "**A cél:** Túlélni a lövéspróbákat, miközben licitálsz az asztali pókerben, és megpróbálod elkerülni a \"Fold\"-ot, ha nyertél!",
+                infoModalPokerRanksTitle: "Póker Kéz Erősség (Általános Sorrend):",
+                infoModalPokerRanksText: "(Megjegyzés: Az asztali játékod szabályai döntőek, ez csak egy általános segédlet.)",
+                bulletsInChamber: "Golyók a revolverben: ",
+                currentBet: "Aktuális tét: ",
+                extraBulletsLabel: "Extra golyók:",
+                startGameBtn: "Játék indítása",
+                addBulletBtn: "Tét hozzáadása",
+                allInBtn: "All-in (8 golyóval)",
+                foldBtn: "Fold (Lövéspróba)",
+                winBtn: "Win",
+                messageReady: "Készen állsz egy halálos játszmára?",
+                messageRoundStart: "A kör 1 golyóval indult. Növeld a tétet, vagy nyomd meg a Fold (Lövéspróba)-t a lövéspróbához, vagy a Win-t, ha nyertél a pókerben!",
+                messageInvalidBullets: "Kérlek válassz érvényes számú extra golyót!",
+                messageTooManyBullets: (remaining) => `Nem tehetsz be ennyi golyót! Maximum ${remaining} golyót rakhatsz még be.`,
+                messageBetIncreased: (bet) => `Téted növelve: ${bet} golyó. Mi a következő lépés?`,
+                messageMaxBet: "Elérted a maximum tétet! Most már csak a Fold (Lövéspróba) vagy a Win maradt!",
+                messageAllIn: "ALL-IN! Maximális téttel licitálsz! Most már csak a Fold (Lövéspróba) vagy a Win maradt!",
+                messageFoldAttempt: (bet) => `FOLD! Lövéspróba az aktuális ${bet} golyóval!`,
+                messageWin: "GYŐZELEM! Sikeresen nyerted a kört!",
+                messageBoom: "BUMM! Kiestél!",
+                messageGameOver: "Játék vége. Kezdj egy új játszmát!",
+                messageClick: "KATT! Túlélted!",
+                messageSurvived: "Katt! Túlélted! Indíts új játékot."
+            },
+            en: {
+                mainTitle: "Liars Poker: Revolver Roulette",
+                infoButton: "i",
+                infoModalTitle: "Liars Poker - Bullet Bet Rules",
+                infoModalWelcome: "Welcome to Liars Poker's deadly revolver roulette! In this game, your courage and luck will decide.",
+                infoModalHowToPlayTitle: "How to Play:",
+                infoModalStep1: "**Start Game:** At the beginning of the round, the revolver automatically gets **1 bullet**. This is the minimum bet.",
+                infoModalStep2Title: "Placing Bets:",
+                infoModalStep2Bullet1: "**\"Add Bet\" button:** You can choose how many extra bullets (1-7) you put into the revolver in the current round. This increases the number of bullets in the revolver, and thus the chance of a hit.",
+                infoModalStep2Bullet2: "**\"All-in\" button:** If you're ready for the ultimate challenge, click the \"All-in\" button. This immediately puts **8 bullets** into the revolver.",
+                infoModalStep3Title: "Decision Buttons:",
+                infoModalStep3Bullet1: "**\"Fold (Shot Attempt)\" button:** Press this if you've decided to take a risk and perform a shot attempt with the **currently loaded bullets**. If it fires, you lose. If it \"Clicks\", you survived the round!",
+                infoModalStep3Bullet2: "**\"Win\" button:** Press this if you **won the table poker game** (and thus don't have to make a shot attempt). This starts a new round and rewards you with a golden screen!",
+                infoModalStep4: "**Elimination:** If the revolver fires, the game ends, and you can restart it with the \"Start Game\" button.",
+                infoModalStep5: "**The Goal:** Survive the shot attempts while betting in table poker, and try to avoid \"Folding\" if you've won!",
+                infoModalPokerRanksTitle: "Poker Hand Strength (General Order):",
+                infoModalPokerRanksText: "(Note: Your table game rules are decisive; this is just a general guide.)",
+                bulletsInChamber: "Bullets in chamber: ",
+                currentBet: "Current bet: ",
+                extraBulletsLabel: "Extra Bullets:",
+                startGameBtn: "Start Game",
+                addBulletBtn: "Add Bet",
+                allInBtn: "All-in (8 bullets)",
+                foldBtn: "Fold (Shot Attempt)",
+                winBtn: "Win",
+                messageReady: "Are you ready for a deadly game?",
+                messageRoundStart: "Round started with 1 bullet. Increase your bet, or press Fold (Shot Attempt) for a shot, or Win if you won at poker!",
+                messageInvalidBullets: "Please select a valid number of extra bullets!",
+                messageTooManyBullets: (remaining) => `You cannot add that many bullets! You can add a maximum of ${remaining} more bullets.`,
+                messageBetIncreased: (bet) => `Your bet increased: ${bet} bullets. What's next?`,
+                messageMaxBet: "You reached maximum bet! Now only Fold (Shot Attempt) or Win remains!",
+                messageAllIn: "ALL-IN! Betting with maximum bullets! Now only Fold (Shot Attempt) or Win remains!",
+                messageFoldAttempt: (bet) => `FOLD! Shot attempt with current ${bet} bullets!`,
+                messageWin: "VICTORY! You successfully won the round!",
+                messageBoom: "BOOM! You're out!",
+                messageGameOver: "Game Over. Start a new game!",
+                messageClick: "CLICK! You survived!",
+                messageSurvived: "Click! You survived! Start a new game."
+            }
+        };
+
+        // Függvény a szövegek frissítéséhez
+        function updateTexts() {
+            const lang = currentLanguage;
+
+            mainTitle.textContent = texts[lang].mainTitle;
+            bulletsInChamberTextSpan.textContent = texts[lang].bulletsInChamber;
+            currentBetTextSpan.textContent = texts[lang].currentBet;
+            extraBulletsLabel.textContent = texts[lang].extraBulletsLabel;
+            startGameBtn.textContent = texts[lang].startGameBtn;
+            addBulletBtn.textContent = texts[lang].addBulletBtn;
+            allInBtn.textContent = texts[lang].allInBtn;
+            foldBtn.textContent = texts[lang].foldBtn;
+            winBtn.textContent = texts[lang].winBtn;
+            messageDisplay.textContent = texts[lang].messageReady;
+
+            // Modal tartalmának frissítése
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.querySelector('h2').textContent = texts[lang].infoModalTitle;
+            
+            // Az első p elem frissítése
+            const firstPInModal = modalContent.querySelector('.modal-content > p');
+            if (firstPInModal) firstPInModal.textContent = texts[lang].infoModalWelcome;
+
+            const olItems = modalContent.querySelectorAll('ol > li');
+            if (olItems[0]) olItems[0].innerHTML = texts[lang].infoModalStep1;
+            
+            // A nested UL elemek elérése az OL-en belül
+            const olItem2Bullets = olItems[1] ? olItems[1].querySelectorAll('ul > li') : null;
+            if (olItem2Bullets && olItem2Bullets[0]) olItem2Bullets[0].innerHTML = texts[lang].infoModalStep2Bullet1;
+            if (olItem2Bullets && olItem2Bullets[1]) olItem2Bullets[1].innerHTML = texts[lang].infoModalStep2Bullet2;
+
+            const olItem3Bullets = olItems[2] ? olItems[2].querySelectorAll('ul > li') : null;
+            if (olItem3Bullets && olItem3Bullets[0]) olItem3Bullets[0].innerHTML = texts[lang].infoModalStep3Bullet1;
+            if (olItem3Bullets && olItem3Bullets[1]) olItem3Bullets[1].innerHTML = texts[lang].infoModalStep3Bullet2;
+            
+            if (olItems[3]) olItems[3].innerHTML = texts[lang].infoModalStep4;
+            if (olItems[4]) olItems[4].innerHTML = texts[lang].infoModalStep5;
+
+            // Címek frissítése
+            const modalHeadings = modalContent.querySelectorAll('h3');
+            if (modalHeadings[0]) modalHeadings[0].textContent = texts[lang].infoModalHowToPlayTitle;
+            if (modalHeadings[1]) modalHeadings[1].textContent = texts[lang].infoModalStep2Title;
+            if (modalHeadings[2]) modalHeadings[2].textContent = texts[lang].infoModalStep3Title;
+            if (modalHeadings[3]) modalHeadings[3].textContent = texts[lang].infoModalPokerRanksTitle;
+
+            // Utolsó p elem a modalban
+            const lastPInModal = modalContent.querySelector('.modal-content p:last-of-type');
+            if (lastPInModal) lastPInModal.textContent = texts[lang].infoModalPokerRanksText;
+
+            // Nyelv gomb szövege
+            languageToggleBtn.textContent = (lang === 'hu' ? 'EN' : 'HU');
+        }
 
         // --- Infó modal kezelése ---
         infoButton.addEventListener('click', () => {
@@ -492,6 +667,16 @@
         });
         // --- Infó modal vége ---
 
+        // Eseménykezelő a nyelváltó gombhoz
+        languageToggleBtn.addEventListener('click', () => {
+            currentLanguage = (currentLanguage === 'hu' ? 'en' : 'hu');
+            updateTexts();
+            updateGameInfo(); // Frissíti a golyó infókat is
+            // Ha játék közben váltunk nyelvet, az üzenetet visszaállítjuk az alapértelmezettre,
+            // mivel az aktuális játékállapotot leíró üzenetek dinamikusak.
+            messageDisplay.textContent = texts[currentLanguage].messageReady;
+        });
+
         // --- Játék indítása és kör kezelése ---
         startGameBtn.addEventListener('click', startGame);
         addBulletBtn.addEventListener('click', handleAddBullet);
@@ -505,19 +690,18 @@
             currentBet = 1;      
             
             updateGameInfo();
-            messageDisplay.textContent = 'A kör 1 golyóval indult. Növeld a tétet, vagy nyomd meg a Fold-ot a lövéspróbához, vagy a Win-t, ha nyertél a pókerben!';
+            messageDisplay.textContent = texts[currentLanguage].messageRoundStart; 
             
-            // Gombok láthatósága és állapota játék indításakor
-            startGameBtn.style.display = 'none'; // Rejtsd el a "Játék indítása" gombot
-            addBulletBtn.style.display = 'block'; // Jelenjen meg
-            allInBtn.style.display = 'block';     // Jelenjen meg
-            foldBtn.style.display = 'block';       // Jelenjen meg
-            winBtn.style.display = 'block';        // Jelenjen meg
+            startGameBtn.style.display = 'none';
+            addBulletBtn.style.display = 'block';
+            allInBtn.style.display = 'block';
+            foldBtn.style.display = 'block';
+            winBtn.style.display = 'block';
 
             addBulletBtn.disabled = false;
             allInBtn.disabled = false;
-            foldBtn.disabled = false; // Kezdetben engedélyezve, mert lehet Foldolni 1 golyóval is
-            winBtn.disabled = false;  // Kezdetben engedélyezve, mert nyerhet valaki a pókernél 1 golyóval is
+            foldBtn.disabled = false;
+            winBtn.disabled = false;  
             extraBulletAmountSelect.disabled = false; 
             
             revolverDisplay.classList.remove('revolver-visible'); 
@@ -542,6 +726,10 @@
             bulletsInChamberSpan.textContent = bulletsInChamber;
             currentBetSpan.textContent = currentBet;
             
+            bulletsInChamberTextSpan.textContent = texts[currentLanguage].bulletsInChamber;
+            currentBetTextSpan.textContent = texts[currentLanguage].currentBet;
+            extraBulletsLabel.textContent = texts[currentLanguage].extraBulletsLabel;
+
             const maxAddableBullets = MAX_CHAMBERS - currentBet; 
             extraBulletAmountSelect.innerHTML = ''; 
             for (let i = 1; i <= maxAddableBullets; i++) {
@@ -554,15 +742,12 @@
             if (maxAddableBullets === 0) { 
                 extraBulletAmountSelect.disabled = true;
                 addBulletBtn.disabled = true;
-                // Ha már nincs hova emelni, akkor az All-in gomb is letiltva
                 allInBtn.disabled = true; 
             } else {
                 extraBulletAmountSelect.disabled = false;
                 addBulletBtn.disabled = false;
-                // Ha van még hova emelni, az All-in gomb is engedélyezve
                 allInBtn.disabled = false;
             }
-            // A fold és win gombok mindig elérhetők, ha a játék aktív
             foldBtn.disabled = false; 
             winBtn.disabled = false; 
         }
@@ -581,14 +766,14 @@
             const extraBullets = parseInt(extraBulletAmountSelect.value);
             
             if (isNaN(extraBullets) || extraBullets <= 0) {
-                messageDisplay.textContent = "Kérlek válassz érvényes számú extra golyót!";
+                messageDisplay.textContent = texts[currentLanguage].messageInvalidBullets;
                 return;
             }
 
             const newTotalBullets = currentBet + extraBullets;
 
             if (newTotalBullets > MAX_CHAMBERS) {
-                messageDisplay.textContent = `Nem tehetsz be ennyi golyót! Maximum ${MAX_CHAMBERS - currentBet} golyót rakhatsz még be.`;
+                messageDisplay.textContent = texts[currentLanguage].messageTooManyBullets(MAX_CHAMBERS - currentBet);
                 return;
             }
 
@@ -596,20 +781,18 @@
             bulletsInChamber = newTotalBullets; 
             updateGameInfo();
 
-            messageDisplay.textContent = `Téted növelve: ${currentBet} golyó. Mi a következő lépés?`;
+            messageDisplay.textContent = texts[currentLanguage].messageBetIncreased(currentBet);
             
-            // Ha elérte a maximumot, akkor tétrakó gombok letiltása
             if (currentBet === MAX_CHAMBERS) { 
                 addBulletBtn.disabled = true;
                 allInBtn.disabled = true;
                 extraBulletAmountSelect.disabled = true;
-                messageDisplay.textContent = "Elérted a maximum tétet! Most már csak a Fold vagy a Win maradt!";
+                messageDisplay.textContent = texts[currentLanguage].messageMaxBet;
             } else {
                 addBulletBtn.disabled = false;
                 allInBtn.disabled = false;
                 extraBulletAmountSelect.disabled = false;
             }
-            // A fold és win gombok mindig engedélyezve maradnak itt
             foldBtn.disabled = false;
             winBtn.disabled = false;
         }
@@ -621,16 +804,14 @@
             bulletsInChamber = MAX_CHAMBERS;
             updateGameInfo();
 
-            messageDisplay.textContent = "ALL-IN! Maximális téttel licitálsz! Most már csak a Fold vagy a Win maradt!";
+            messageDisplay.textContent = texts[currentLanguage].messageAllIn;
             
-            // Az "All-in" után a tétrakó gombok letiltva és elrejtve
             addBulletBtn.disabled = true;
             allInBtn.disabled = true;
             extraBulletAmountSelect.disabled = true;
-            addBulletBtn.style.display = 'none'; // Rejtsd el
-            allInBtn.style.display = 'none';     // Rejtsd el
+            addBulletBtn.style.display = 'none'; 
+            allInBtn.style.display = 'none';     
 
-            // A Fold és Win gombok aktívak és láthatók maradnak
             foldBtn.disabled = false; 
             winBtn.disabled = false; 
             foldBtn.style.display = 'block';
@@ -640,20 +821,19 @@
         function handleFold() {
             if (!gameActive) return;
 
-            messageDisplay.textContent = `FOLD! Lövéspróba az aktuális ${currentBet} golyóval!`;
+            messageDisplay.textContent = texts[currentLanguage].messageFoldAttempt(currentBet);
             
-            // Gombok letiltása és elrejtése lövéspróba alatt
             addBulletBtn.disabled = true;
             allInBtn.disabled = true;
             foldBtn.disabled = true;
             winBtn.disabled = true;
             extraBulletAmountSelect.disabled = true;
-            startGameBtn.disabled = true; // Ez már rejtett, de a biztonság kedvéért disabled
+            startGameBtn.disabled = true;
 
-            addBulletBtn.style.display = 'none'; // Rejtsd el
-            allInBtn.style.display = 'none';     // Rejtsd el
-            foldBtn.style.display = 'none';      // Rejtsd el
-            winBtn.style.display = 'none';       // Rejtsd el
+            addBulletBtn.style.display = 'none'; 
+            allInBtn.style.display = 'none';     
+            foldBtn.style.display = 'none';      
+            winBtn.style.display = 'none';       
 
             setTimeout(() => performShotAttempt(), 2000);
         }
@@ -661,9 +841,8 @@
         function handleWin() { 
             if (!gameActive) return;
 
-            messageDisplay.textContent = `GYŐZELEM! Sikeresen nyerted a kört!`;
+            messageDisplay.textContent = texts[currentLanguage].messageWin;
             
-            // Gombok letiltása és elrejtése a győzelem pillanatában
             addBulletBtn.disabled = true;
             allInBtn.disabled = true;
             foldBtn.disabled = true;
@@ -684,8 +863,7 @@
 
             setTimeout(() => {
                 goldOverlay.classList.remove('active'); 
-                messageDisplay.textContent = 'Készen állsz egy halálos játszmára?'; 
-                startGame(); // Új kör indítása
+                startGame(); 
             }, 5000); 
         }
 
@@ -703,8 +881,7 @@
                 const bulletHitPosition = Math.floor(Math.random() * MAX_CHAMBERS); 
 
                 if (bulletHitPosition < bulletsInChamber) { 
-                    // *** BUMM! A játékos vesztett! ***
-                    messageDisplay.textContent = `BUMM! Kiestél!`;
+                    messageDisplay.textContent = texts[currentLanguage].messageBoom;
                     chamberDisplay.textContent = 'X'; 
                     bulletSound.currentTime = 0;
                     bulletSound.play().catch(e => console.error("Lövés hangja sikertelen:", e));
@@ -719,9 +896,9 @@
                     
                     setTimeout(() => {
                         redOverlay.classList.remove('active'); 
-                        messageDisplay.textContent = 'Játék vége. Kezdj egy új játszmát!';
-                        startGameBtn.style.display = 'block'; // A "Játék indítása" gomb újra megjelenik
-                        startGameBtn.disabled = false; // Engedélyezzük
+                        messageDisplay.textContent = texts[currentLanguage].messageGameOver;
+                        startGameBtn.style.display = 'block'; 
+                        startGameBtn.disabled = false; 
 
                         mainTitle.classList.remove('hidden-during-red');
                         gameElementsContainer.classList.remove('hidden-during-red');
@@ -732,16 +909,14 @@
                     }, 5000); 
                     
                 } else {
-                    // *** KATT! Túlélte! ***
-                    messageDisplay.textContent = `KATT! Túlélted!`;
+                    messageDisplay.textContent = texts[currentLanguage].messageClick;
                     chamberDisplay.textContent = 'O'; 
                     clickEmptySound.currentTime = 0;
                     clickEmptySound.play().catch(e => console.error("Üres kattanás hangja sikertelen:", e));
                     
                     setTimeout(() => {
-                        messageDisplay.textContent = 'Katt! Túlélted! Indíts új játékot.'; 
+                        messageDisplay.textContent = texts[currentLanguage].messageSurvived; 
                         
-                        // Letiltunk mindent, és csak a Játék indítása gombot tesszük láthatóvá
                         addBulletBtn.disabled = true;
                         allInBtn.disabled = true;
                         foldBtn.disabled = true;
@@ -753,7 +928,7 @@
                         foldBtn.style.display = 'none';
                         winBtn.style.display = 'none';
 
-                        startGameBtn.style.display = 'block'; // "Játék indítása" gomb megjelenítése
+                        startGameBtn.style.display = 'block'; 
                         startGameBtn.disabled = false;
 
                         revolverDisplay.classList.remove('revolver-visible'); 
@@ -765,8 +940,8 @@
         }
 
         // --- Init: Játék kezdeti állapota ---
-        updateGameInfo();
-        // A tétrakó és akció gombok kezdetben rejtettek
+        updateTexts(); // Első hívás a kezdeti szövegek beállításához
+        updateGameInfo(); // Frissíti a golyó infókat is
         addBulletBtn.style.display = 'none';
         allInBtn.style.display = 'none';
         foldBtn.style.display = 'none'; 
@@ -778,7 +953,6 @@
         redOverlay.classList.remove('active'); 
         goldOverlay.classList.remove('active'); 
         
-        // A "Játék indítása" gomb alapból látható és aktív
         startGameBtn.style.display = 'block';
         startGameBtn.disabled = false;
     </script>
