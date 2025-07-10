@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liars Poker: Revolver Roulette</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #333333, #1a1a1a); /* Alap háttér */
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        body.red-screen { /* Ez az osztály teszi pirossá a hátteret */
+            background-color: #e74c3c; /* Élénk piros */
+            transition: background-color 0.1s ease-in; /* Gyors átmenet pirosra */
+        }
+        body.gold-screen { /* ÚJ: Arany képernyő a győzelemhez */
+            background-color: #FFD700; /* Arany szín */
+            transition: background-color 0.5s ease-in-out; /* Simább átmenet */
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease; /* Átmenet a címnél, ha elrejtjük */
+        }
+
+        #info-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498DB;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #2980B9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.2s, transform 0.2s, opacity 0.5s ease; /* Átmenet a gombon, ha elrejtjük */
+            z-index: 1001; /* Hogy a piros villanás alatt is látszódjon */
+        }
+
+        #info-button:hover {
+            background-color: #2980B9;
+            transform: scale(1.05);
+        }
+
+        #info-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000; /* MÓDOSÍTOTT ÉRTÉK */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #2c3e50;
+            margin: auto;
+            padding: 25px;
+            border: 3px solid #FFD700;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            color: #eee;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #FFD700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2, .modal-content h3 {
+            color: #FFD700;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2em;
+        }
+
+        .modal-content ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content ol {
+            list-style-type: decimal;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            margin-bottom: 10px;
+        }
+
+        #poker-rank-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            border: 2px solid #FFD700;
+            border-radius: 5px;
+        }
+
+        #game-info, .bet-controls, .button-container {
+            transition: opacity 0.5s ease; /* Átmenet az elemek elrejtésére/megjelenítésére */
+        }
+
+        #game-info {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #FFD700;
+            font-weight: bold;
+            text-align: center;
+            min-height: 50px;
+        }
+
+        #current-bet-info {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #eee;
+        }
+
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bet-controls label {
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .bet-controls select {
+            padding: 8px 15px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #FFD700;
+            background-color: #2c3e50;
+            color: #eee;
+            cursor: pointer;
+            outline: none;
+        }
+        .bet-controls select:focus {
+            border-color: #E74C3C;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        button {
+            padding: 18px 35px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #E74C3C;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        #addBulletBtn {
+            background-color: #28a745; /* Zöld */
+        }
+        #allInBtn {
+            background-color: #dc3545; /* Sötét piros az All-in-hez */
+        }
+        #foldBtn {
+            background-color: #ffc107; /* Sárga */
+            color: #333;
+        }
+        #startGameBtn {
+            background-color: #007bff; /* Kék */
+        }
+        #newRoundBtn {
+            background-color: #17a2b8; /* Cián kék */
+        }
+        #winBtn { /* ÚJ GOMB STÍLUS */
+            background-color: #4CAF50; /* Zöldebb */
+            color: white;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #C0392B;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        #addBulletBtn:hover:not(:disabled) { background-color: #218838; }
+        #allInBtn:hover:not(:disabled) { background-color: #c82333; }
+        #foldBtn:hover:not(:disabled) { background-color: #e0a800; }
+        #startGameBtn:hover:not(:disabled) { background-color: #0056b3; }
+        #newRoundBtn:hover:not(:disabled) { background-color: #138496; }
+        #winBtn:hover:not(:disabled) { background-color: #45a049; } /* ÚJ GOMB HOVER STÍLUS */
+
+        button:active:not(:disabled) {
+            background-color: #A93226;
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #addBulletBtn:active:not(:disabled) { background-color: #1e7e34; }
+        #allInBtn:active:not(:disabled) { background-color: #bd2130; }
+        #foldBtn:active:not(:disabled) { background-color: #d39e00; }
+        #startGameBtn:active:not(:disabled) { background-color: #004085; }
+        #newRoundBtn:active:not(:disabled) { background-color: #117a8b; }
+        #winBtn:active:not(:disabled) { background-color: #3e8e41; } /* ÚJ GOMB ACTIVE STÍLUS */
+
+        button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #revolver-display {
+            width: 200px;
+            height: 200px;
+            border: 4px solid #FFD700;
+            border-radius: 50%;
+            display: flex; /* Mindig flex, hogy a gyermek elemek jól rendeződjenek */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #2c3e50;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            margin-top: 20px;
+            opacity: 0; /* Alapból átlátszatlan */
+            pointer-events: none; /* Ne lehessen kattintani rá, ha rejtett */
+            transition: opacity 0.5s ease; /* Átmenet az elrejtésére/megjelenítésére */
+            z-index: 999; /* Hogy a piros villanás alatt is látszódjon */
+        }
+
+        #chamber-display {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 4em;
+            color: #eee;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; /* Kitölti a revolver-displayt */
+            height: 100%; /* Kitölti a revolver-displayt */
+            line-height: 1; /* Elveszi a betű alapértelmezett sorközét, ami eltolhatja */
+            z-index: 2;
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        #message-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+            color: #eee;
+            min-height: 1.5em;
+            transition: opacity 0.5s ease; /* Átmenet az elrejtésére/megjelenítésére */
+            z-index: 1002; /* Message display legyen az első piros képernyőn */
+        }
+        
+        /* ÚJ stílus az elemek elrejtésére, amikor a piros képernyő aktív */
+        .hidden-during-red {
+            opacity: 0;
+            pointer-events: none; /* Letiltja a kattintást az elemre, ha rejtett */
+        }
+        /* Revolver display láthatóság vezérlése JS-ből, opacity-vel */
+        .revolver-visible {
+            opacity: 1 !important; /* Fontos, hogy felülírja az alap opacity: 0-t */
+            pointer-events: auto !important;
+        }
+
+        /* ÚJ: Egy overlay, ami fedi az egész képernyőt a piros villanáskor */
+        #red-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #e74c3c; /* Élénk piros */
+            opacity: 0; /* Alapból átlátszatlan */
+            pointer-events: none; /* Ne akadályozza a kattintást, ha rejtett */
+            z-index: 998; /* A revolver kijelzője és az infó gomb fölé, de a message alá */
+            transition: opacity 0.1s ease-in;
+        }
+        #red-overlay.active {
+            opacity: 1;
+        }
+        /* ÚJ: Arany overlay a győzelemhez */
+        #gold-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFD700; /* Arany szín */
+            opacity: 0; /* Alapból átlátszatlan */
+            pointer-events: none; /* Ne akadályozza a kattintást, ha rejtett */
+            z-index: 998; /* A revolver kijelzője és az infó gomb fölé, de a message alá */
+            transition: opacity 0.5s ease-in-out; /* Simább átmenet */
+        }
+        #gold-overlay.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="main-title">Liars Poker: Revolver Rulett</h1>
+
+    <div id="info-button">i</div>
+
+    <div id="info-modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Liars Poker - A Lőszer Tét Szabályai</h2>
+            <p>Üdvözöllek a Liars Poker halálos revolver rulettjében! Ebben a játékban a bátorságod és a szerencséd dönt.</p>
+
+            <h3>A Játék Menete:</h3>
+            <ol>
+                <li>**Játék indítása:** A kör kezdetén a revolver automatikusan kap **1 golyót**. Ez a minimális tét.</li>
+                <li>**Tétrakás:**
+                    <ul>
+                        <li>**"Tét hozzáadása" gomb:** Választhatsz, hogy mennyi extra golyót (1-7) teszel be a revolverbe az aktuális körben. Ez növeli a revolverben lévő golyók számát, és így a találat esélyét is.</li>
+                        <li>**"All-in" gomb:** Ha készen állsz a végső próbára, kattints az "All-in" gombra. Ezzel azonnal **8 golyót** teszel a revolverbe.</li>
+                    </ul>
+                </li>
+                <li>**A döntés gombok:**
+                    <ul>
+                        <li>**"Fold/lővés" gomb:** Ezt akkor nyomd meg, ha úgy döntöttél, hogy kockáztatsz, és lövéspróbát hajtasz végre az **aktuálisan betett golyókkal**. Ha elsül, vesztettél. Ha "Katt", túlélted a kört!</li>
+                        <li>**"[Win]" gomb:** Ezt akkor nyomd meg, ha **az asztali póker játékban nyertél** (és így nem kell lövéspróbát tenned). Ez új kört indít, és arany színű jutalmazásban részesülsz!</li>
+                    </ul>
+                </li>
+                <li>**Kiesés:** Ha a revolver elsül, a játék véget ér, és a "Játék indítása" gombbal tudod újra kezdeni.</li>
+                <li>**A cél:** Túlélni a lövéspróbákat, miközben licitálsz az asztali pókerben, és megpróbálod elkerülni a "Fold"-ot, ha nyertél!</li>
+            </ol>
+            
+            <h3>Póker Kéz Erősség (Általános Sorrend):</h3>
+            <p>Az alábbi kép segít megérteni a póker lapkombinációk erősségi sorrendjét.</p>
+            <img id="poker-rank-image" src="poker_ranks.png" alt="Póker Kéz Erősségi Sorrend">
+            <p>(Megjegyzés: Az asztali játékod szabályai döntőek, ez csak egy általános segédlet.)</p>
+        </div>
+    </div>
+
+    <div id="game-elements-container"> <div id="game-info">
+            <p>Golyók a revolverben: <span id="bullets-in-chamber">0</span>/8</p>
+            <p>Aktuális tét: <span id="current-bet">0</span> golyó</p>
+        </div>
+
+        <div class="bet-controls">
+            <label for="extraBulletAmount">Extra golyók:</label>
+            <select id="extraBulletAmount">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+        </div>
+
+        <div class="button-container">
+            <button id="startGameBtn">Játék indítása</button>
+            <button id="addBulletBtn" style="display: none;">Tét hozzáadása</button> <button id="allInBtn" style="display: none;">All-in (8 golyóval)</button> <button id="foldBtn" style="display: none;">Fold/Lövéspróba</button>
+            <button id="winBtn" style="display: none;">Win</button>
+        </div>
+        
+    </div> <div id="revolver-display">
+        <span id="chamber-display">?</span>
+    </div>
+
+    <div id="message-display">Készen állsz egy halálos játszmára?</div>
+
+    <div id="red-overlay"></div>
+    <div id="gold-overlay"></div>
+
+
+    <audio id="trigger-pull-sound" src="trigger_pull.mp3" preload="auto"></audio>
+    <audio id="bullet-sound" src="bullet_shot.mp3" preload="auto"></audio>
+    <audio id="click-empty-sound" src="click_empty.mp3" preload="auto"></audio>
+    <audio id="game-music" src="game_music.mp3" preload="auto" loop></audio>
+
+    <script>
+        // DOM elemek
+        const infoButton = document.getElementById('info-button');
+        const infoModal = document.getElementById('info-modal');
+        const closeButton = document.querySelector('.close-button');
+        const bulletsInChamberSpan = document.getElementById('bullets-in-chamber');
+        const currentBetSpan = document.getElementById('current-bet');
+        const extraBulletAmountSelect = document.getElementById('extraBulletAmount');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const addBulletBtn = document.getElementById('addBulletBtn');
+        const allInBtn = document.getElementById('allInBtn');
+        const foldBtn = document.getElementById('foldBtn');
+        const winBtn = document.getElementById('winBtn'); 
+        const revolverDisplay = document.getElementById('revolver-display');
+        const chamberDisplay = document.getElementById('chamber-display');
+        const messageDisplay = document.getElementById('message-display');
+        const body = document.body;
+
+        // Új DOM elemek
+        const mainTitle = document.getElementById('main-title');
+        const gameElementsContainer = document.getElementById('game-elements-container');
+        const redOverlay = document.getElementById('red-overlay');
+        const goldOverlay = document.getElementById('gold-overlay');
+
+        // Hangfájlok
+        const triggerPullSound = document.getElementById('trigger-pull-sound');
+        const bulletSound = document.getElementById('bullet-sound');
+        const clickEmptySound = document.getElementById('click-empty-sound');
+        const gameMusic = document.getElementById('game-music');
+
+        // Játék állapot változók
+        let bulletsInChamber = 0; 
+        let currentBet = 0;      
+        let gameActive = false;
+        const MAX_CHAMBERS = 8; 
+
+        // --- Infó modal kezelése ---
+        infoButton.addEventListener('click', () => {
+            infoModal.style.display = 'flex';
+        });
+
+        closeButton.addEventListener('click', () => {
+            infoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == infoModal) {
+                infoModal.style.display = 'none';
+            }
+        });
+        // --- Infó modal vége ---
+
+        // --- Játék indítása és kör kezelése ---
+        startGameBtn.addEventListener('click', startGame);
+        addBulletBtn.addEventListener('click', handleAddBullet);
+        allInBtn.addEventListener('click', handleAllIn);
+        foldBtn.addEventListener('click', handleFold);
+        winBtn.addEventListener('click', handleWin);
+
+        function startGame() {
+            gameActive = true;
+            bulletsInChamber = 1; 
+            currentBet = 1;      
+            
+            updateGameInfo();
+            messageDisplay.textContent = 'A kör 1 golyóval indult. Növeld a tétet, vagy nyomd meg a Fold-ot a lövéspróbához, vagy a Win-t, ha nyertél a pókerben!';
+            
+            // Gombok láthatósága és állapota játék indításakor
+            startGameBtn.style.display = 'none'; // Rejtsd el a "Játék indítása" gombot
+            addBulletBtn.style.display = 'block'; // Jelenjen meg
+            allInBtn.style.display = 'block';     // Jelenjen meg
+            foldBtn.style.display = 'block';       // Jelenjen meg
+            winBtn.style.display = 'block';        // Jelenjen meg
+
+            addBulletBtn.disabled = false;
+            allInBtn.disabled = false;
+            foldBtn.disabled = false; // Kezdetben engedélyezve, mert lehet Foldolni 1 golyóval is
+            winBtn.disabled = false;  // Kezdetben engedélyezve, mert nyerhet valaki a pókernél 1 golyóval is
+            extraBulletAmountSelect.disabled = false; 
+            
+            revolverDisplay.classList.remove('revolver-visible'); 
+            chamberDisplay.textContent = '?'; 
+
+            body.classList.remove('red-screen');
+            body.classList.remove('gold-screen'); 
+            redOverlay.classList.remove('active'); 
+            goldOverlay.classList.remove('active'); 
+            mainTitle.classList.remove('hidden-during-red');
+            infoButton.classList.remove('hidden-during-red');
+            gameElementsContainer.classList.remove('hidden-during-red');
+
+            gameMusic.volume = 0.3; 
+            gameMusic.play().catch(e => console.error("Játékzene lejátszása sikertelen:", e));
+
+            extraBulletAmountSelect.value = 1;
+            checkAllInButtonState(); 
+        }
+
+        function updateGameInfo() {
+            bulletsInChamberSpan.textContent = bulletsInChamber;
+            currentBetSpan.textContent = currentBet;
+            
+            const maxAddableBullets = MAX_CHAMBERS - currentBet; 
+            extraBulletAmountSelect.innerHTML = ''; 
+            for (let i = 1; i <= maxAddableBullets; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                extraBulletAmountSelect.appendChild(option);
+            }
+
+            if (maxAddableBullets === 0) { 
+                extraBulletAmountSelect.disabled = true;
+                addBulletBtn.disabled = true;
+                // Ha már nincs hova emelni, akkor az All-in gomb is letiltva
+                allInBtn.disabled = true; 
+            } else {
+                extraBulletAmountSelect.disabled = false;
+                addBulletBtn.disabled = false;
+                // Ha van még hova emelni, az All-in gomb is engedélyezve
+                allInBtn.disabled = false;
+            }
+            // A fold és win gombok mindig elérhetők, ha a játék aktív
+            foldBtn.disabled = false; 
+            winBtn.disabled = false; 
+        }
+
+        function checkAllInButtonState() {
+            if (currentBet < MAX_CHAMBERS) {
+                allInBtn.disabled = false;
+            } else {
+                allInBtn.disabled = true; 
+            }
+        }
+
+        function handleAddBullet() {
+            if (!gameActive) return;
+
+            const extraBullets = parseInt(extraBulletAmountSelect.value);
+            
+            if (isNaN(extraBullets) || extraBullets <= 0) {
+                messageDisplay.textContent = "Kérlek válassz érvényes számú extra golyót!";
+                return;
+            }
+
+            const newTotalBullets = currentBet + extraBullets;
+
+            if (newTotalBullets > MAX_CHAMBERS) {
+                messageDisplay.textContent = `Nem tehetsz be ennyi golyót! Maximum ${MAX_CHAMBERS - currentBet} golyót rakhatsz még be.`;
+                return;
+            }
+
+            currentBet = newTotalBullets;
+            bulletsInChamber = newTotalBullets; 
+            updateGameInfo();
+
+            messageDisplay.textContent = `Téted növelve: ${currentBet} golyó. Mi a következő lépés?`;
+            
+            // Ha elérte a maximumot, akkor tétrakó gombok letiltása
+            if (currentBet === MAX_CHAMBERS) { 
+                addBulletBtn.disabled = true;
+                allInBtn.disabled = true;
+                extraBulletAmountSelect.disabled = true;
+                messageDisplay.textContent = "Elérted a maximum tétet! Most már csak a Fold vagy a Win maradt!";
+            } else {
+                addBulletBtn.disabled = false;
+                allInBtn.disabled = false;
+                extraBulletAmountSelect.disabled = false;
+            }
+            // A fold és win gombok mindig engedélyezve maradnak itt
+            foldBtn.disabled = false;
+            winBtn.disabled = false;
+        }
+
+        function handleAllIn() {
+            if (!gameActive) return;
+
+            currentBet = MAX_CHAMBERS; 
+            bulletsInChamber = MAX_CHAMBERS;
+            updateGameInfo();
+
+            messageDisplay.textContent = "ALL-IN! Maximális téttel licitálsz! Most már csak a Fold vagy a Win maradt!";
+            
+            // Az "All-in" után a tétrakó gombok letiltva és elrejtve
+            addBulletBtn.disabled = true;
+            allInBtn.disabled = true;
+            extraBulletAmountSelect.disabled = true;
+            addBulletBtn.style.display = 'none'; // Rejtsd el
+            allInBtn.style.display = 'none';     // Rejtsd el
+
+            // A Fold és Win gombok aktívak és láthatók maradnak
+            foldBtn.disabled = false; 
+            winBtn.disabled = false; 
+            foldBtn.style.display = 'block';
+            winBtn.style.display = 'block';
+        }
+
+        function handleFold() {
+            if (!gameActive) return;
+
+            messageDisplay.textContent = `FOLD! Lövéspróba az aktuális ${currentBet} golyóval!`;
+            
+            // Gombok letiltása és elrejtése lövéspróba alatt
+            addBulletBtn.disabled = true;
+            allInBtn.disabled = true;
+            foldBtn.disabled = true;
+            winBtn.disabled = true;
+            extraBulletAmountSelect.disabled = true;
+            startGameBtn.disabled = true; // Ez már rejtett, de a biztonság kedvéért disabled
+
+            addBulletBtn.style.display = 'none'; // Rejtsd el
+            allInBtn.style.display = 'none';     // Rejtsd el
+            foldBtn.style.display = 'none';      // Rejtsd el
+            winBtn.style.display = 'none';       // Rejtsd el
+
+            setTimeout(() => performShotAttempt(), 2000);
+        }
+
+        function handleWin() { 
+            if (!gameActive) return;
+
+            messageDisplay.textContent = `GYŐZELEM! Sikeresen nyerted a kört!`;
+            
+            // Gombok letiltása és elrejtése a győzelem pillanatában
+            addBulletBtn.disabled = true;
+            allInBtn.disabled = true;
+            foldBtn.disabled = true;
+            winBtn.disabled = true;
+            extraBulletAmountSelect.disabled = true;
+            startGameBtn.disabled = true; 
+
+            addBulletBtn.style.display = 'none'; 
+            allInBtn.style.display = 'none';     
+            foldBtn.style.display = 'none';      
+            winBtn.style.display = 'none';       
+
+            revolverDisplay.classList.remove('revolver-visible');
+            chamberDisplay.textContent = '?'; 
+
+            goldOverlay.classList.add('active'); 
+            body.classList.remove('red-screen'); 
+
+            setTimeout(() => {
+                goldOverlay.classList.remove('active'); 
+                messageDisplay.textContent = 'Készen állsz egy halálos játszmára?'; 
+                startGame(); // Új kör indítása
+            }, 5000); 
+        }
+
+        function performShotAttempt() {
+            revolverDisplay.classList.add('revolver-visible');
+            revolverDisplay.classList.add('shake'); 
+            chamberDisplay.textContent = '?'; 
+
+            triggerPullSound.currentTime = 0;
+            triggerPullSound.play().catch(e => console.error("Ravasz húzás hangja sikertelen:", e));
+
+            setTimeout(() => {
+                revolverDisplay.classList.remove('shake');
+                
+                const bulletHitPosition = Math.floor(Math.random() * MAX_CHAMBERS); 
+
+                if (bulletHitPosition < bulletsInChamber) { 
+                    // *** BUMM! A játékos vesztett! ***
+                    messageDisplay.textContent = `BUMM! Kiestél!`;
+                    chamberDisplay.textContent = 'X'; 
+                    bulletSound.currentTime = 0;
+                    bulletSound.play().catch(e => console.error("Lövés hangja sikertelen:", e));
+                    
+                    gameActive = false;
+                    gameMusic.pause(); 
+
+                    mainTitle.classList.add('hidden-during-red');
+                    gameElementsContainer.classList.add('hidden-during-red');
+                    
+                    redOverlay.classList.add('active'); 
+                    
+                    setTimeout(() => {
+                        redOverlay.classList.remove('active'); 
+                        messageDisplay.textContent = 'Játék vége. Kezdj egy új játszmát!';
+                        startGameBtn.style.display = 'block'; // A "Játék indítása" gomb újra megjelenik
+                        startGameBtn.disabled = false; // Engedélyezzük
+
+                        mainTitle.classList.remove('hidden-during-red');
+                        gameElementsContainer.classList.remove('hidden-during-red');
+                        
+                        revolverDisplay.classList.remove('revolver-visible');
+                        chamberDisplay.textContent = '?'; 
+
+                    }, 5000); 
+                    
+                } else {
+                    // *** KATT! Túlélte! ***
+                    messageDisplay.textContent = `KATT! Túlélted!`;
+                    chamberDisplay.textContent = 'O'; 
+                    clickEmptySound.currentTime = 0;
+                    clickEmptySound.play().catch(e => console.error("Üres kattanás hangja sikertelen:", e));
+                    
+                    setTimeout(() => {
+                        messageDisplay.textContent = 'Katt! Túlélted! Indíts új játékot.'; 
+                        
+                        // Letiltunk mindent, és csak a Játék indítása gombot tesszük láthatóvá
+                        addBulletBtn.disabled = true;
+                        allInBtn.disabled = true;
+                        foldBtn.disabled = true;
+                        winBtn.disabled = true;
+                        extraBulletAmountSelect.disabled = true;
+
+                        addBulletBtn.style.display = 'none';
+                        allInBtn.style.display = 'none';
+                        foldBtn.style.display = 'none';
+                        winBtn.style.display = 'none';
+
+                        startGameBtn.style.display = 'block'; // "Játék indítása" gomb megjelenítése
+                        startGameBtn.disabled = false;
+
+                        revolverDisplay.classList.remove('revolver-visible'); 
+                        chamberDisplay.textContent = '?'; 
+                        
+                    }, 1500); 
+                }
+            }, 1000); 
+        }
+
+        // --- Init: Játék kezdeti állapota ---
+        updateGameInfo();
+        // A tétrakó és akció gombok kezdetben rejtettek
+        addBulletBtn.style.display = 'none';
+        allInBtn.style.display = 'none';
+        foldBtn.style.display = 'none'; 
+        winBtn.style.display = 'none'; 
+
+        extraBulletAmountSelect.disabled = true;
+        revolverDisplay.classList.remove('revolver-visible'); 
+        chamberDisplay.textContent = '?'; 
+        redOverlay.classList.remove('active'); 
+        goldOverlay.classList.remove('active'); 
+        
+        // A "Játék indítása" gomb alapból látható és aktív
+        startGameBtn.style.display = 'block';
+        startGameBtn.disabled = false;
+    </script>
+</body>
+</html>
